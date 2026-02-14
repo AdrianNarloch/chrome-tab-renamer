@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rename Tabs</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 12px;
+        width: 300px;
+        font-family: Arial, sans-serif;
+      }
+      .field {
+        margin-bottom: 10px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      button {
+        flex: 1 1 30%;
+        padding: 8px;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 8px;
+        font-size: 12px;
+      }
+      .footnote {
+        margin-top: 10px;
+        font-size: 11px;
+        color: #666;
+        text-align: center;
+      }
+      .footnote a {
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="field">
+      <label for="targetText">Target text (find in tab title)</label>
+      <input id="targetText" type="text" placeholder="IKEA Furniture Black & White" />
+    </div>
+
+    <div class="field">
+      <label for="replacementText">Replacement text</label>
+      <input id="replacementText" type="text" placeholder="IKEA" />
+    </div>
+
+    <div class="field">
+      <label for="domainText">Domain (optional)</label>
+      <input id="domainText" type="text" placeholder="example.com" />
+    </div>
+
+    <div class="buttons">
+      <button id="saveApplyBtn">Save & Apply</button>
+      <button id="browseBtn">Browse</button>
+    </div>
+
+    <div id="status"></div>
+
+    <div class="footnote">
+      Developed by <a href="https://narloch.dev" target="_blank" rel="noopener noreferrer">Adrian Narloch</a>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

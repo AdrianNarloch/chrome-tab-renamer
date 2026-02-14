@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Title Replacer",
+  "version": "1.0.0",
+  "description": "Replace matching text in open tab titles and keep rules after restart.",
+  "permissions": ["tabs", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "Group@16.png",
+    "32": "Group@32.png",
+    "48": "Group@48.png",
+    "128": "Group@128.png"
+  },
+  "action": {
+    "default_title": "Rename tabs",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "Group@16.png",
+      "32": "Group@32.png",
+      "48": "Group@48.png",
+      "128": "Group@128.png"
+    }
+  }
+}
