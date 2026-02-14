@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "exportedAt": "2026-02-14T00:00:00.000Z",
+  "rules": [
+    {
+      "id": "demo-1",
+      "targetText": "Hozier - Take Me to Church (Official Video) - YouTube",
+      "replacementText": "Hozier - Take Me to Church",
+      "domain": "youtube.com",
+      "enabled": true
+    },
+    {
+      "id": "demo-2",
+      "targetText": "openai/gpt-5: Model behavior and safety notes · GitHub",
+      "replacementText": "openai/gpt-5",
+      "domain": "github.com",
+      "enabled": true
+    },
+    {
+      "id": "demo-3",
+      "targetText": "Quarterly Financial Report — Q4 2025 (Confidential Draft)",
+      "replacementText": "Q4 2025 Report",
+      "domain": "",
+      "enabled": true
+    },
+    {
+      "id": "demo-4",
+      "targetText": "Product Strategy Roadmap 2026 - Google Docs",
+      "replacementText": "Roadmap 2026",
+      "domain": "docs.google.com",
+      "enabled": true
+    },
+    {
+      "id": "demo-5",
+      "targetText": "Brand System — Header / Footer / Navigation / Hero — Figma",
+      "replacementText": "Brand System",
+      "domain": "figma.com",
+      "enabled": true
+    }
+  ]
+}

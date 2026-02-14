@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Tab Title Replacer",
+  "name": "Simple Tab Renamer",
   "version": "1.0.0",
   "description": "Replace matching text in open tab titles and keep rules after restart.",
   "permissions": ["tabs", "scripting", "storage"],

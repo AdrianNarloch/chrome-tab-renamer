@@ -20,6 +20,22 @@ function createRuleId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function dedupeRules(rules) {
+  const seen = new Set();
+  const unique = [];
+
+  for (const rule of rules) {
+    const key = `${rule.targetText}||${rule.replacementText || ''}||${rule.domain || ''}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    unique.push(rule);
+  }
+
+  return unique;
+}
+
 function normalizeDomain(value) {
   const trimmed = (value || '').trim().toLowerCase();
   if (!trimmed) {
@@ -82,7 +98,8 @@ async function saveAndApply() {
     rules.push({ id: createRuleId(), targetText, replacementText, domain, enabled: true });
   }
 
-  await chrome.storage.local.set({ renameRules: rules });
+  const uniqueRules = dedupeRules(rules);
+  await chrome.storage.local.set({ renameRules: uniqueRules });
 
   chrome.runtime.sendMessage({ type: 'APPLY_RULE_NOW' });
   clearFormControls();
