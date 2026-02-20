@@ -24,6 +24,7 @@ This is handy for shortening noisy titles like:
 
 - **Rule-based renaming**: replace a *target text* with a *replacement text*.
 - **Optional domain scoping**: apply a rule only on a specific domain (e.g. `github.com`), or leave empty to apply to **all domains**.
+- **Optional exact URL scoping**: apply a rule only when the URL (including domain, path, query, hash) matches exactly.
 - **Persists rules** using `chrome.storage.local` (survives restarts).
 - **Auto-apply** on:
   - extension install
@@ -44,6 +45,7 @@ This is handy for shortening noisy titles like:
    - **Target text**: substring to find in the current `document.title`
    - **Replacement text**: what to replace it with (can be empty)
    - **Domain (optional)**: applies to matching hostnames (including subdomains)
+   - **Exact URL (optional)**: match by `domain + pathname + search + hash` (e.g. `docs.example.com/docs/page?tab=api#section`)
 2. The extension injects a small script into matching tabs and updates `document.title`.
 
 Note: Some pages can’t be scripted (for example `chrome://` pages). Those will be skipped silently.
@@ -68,6 +70,7 @@ Note: Some pages can’t be scripted (for example `chrome://` pages). Those will
    - **Target text**
    - **Replacement text**
    - *(optional)* **Domain**
+   - *(optional)* **Exact URL (include domain)**
 3. Click **Save & Apply** to apply immediately to currently open tabs.
 
 ### Manage rules

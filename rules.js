@@ -30,6 +30,60 @@ function normalizeDomain(value) {
   }
 }
 
+function normalizeUrlPath(value) {
+  const trimmed = (value || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+
+  return `/${trimmed}`;
+}
+
+function normalizeExactUrlKey(value) {
+  const trimmed = (value || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  const withScheme = trimmed.includes('://') ? trimmed : `https://${trimmed}`;
+
+  try {
+    const parsed = new URL(withScheme);
+    if (!parsed.host) {
+      return '';
+    }
+    const host = parsed.host.toLowerCase();
+    const path = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/';
+    return `${host}${path}`;
+  } catch (error) {
+    return '';
+  }
+}
+
+function getRuleExactUrlKey(rule) {
+  if (!rule || typeof rule !== 'object') {
+    return '';
+  }
+
+  const direct = normalizeExactUrlKey(rule.urlExact || rule.exactUrl || rule.url || '');
+  if (direct) {
+    return direct;
+  }
+
+  const domain = normalizeDomain(rule.domain || '');
+  const rawUrlPath = typeof rule.urlPath === 'string' ? rule.urlPath.trim() : '';
+  const urlPath = normalizeUrlPath(rawUrlPath);
+  if (domain && rawUrlPath && urlPath) {
+    return normalizeExactUrlKey(`${domain}${urlPath}`);
+  }
+
+  return '';
+}
+
 async function getRulesFromStorage() {
   const result = await chrome.storage.local.get(['renameRules', 'renameRule']);
 
@@ -72,6 +126,10 @@ function sanitizeRule(rawRule) {
   const replacementText =
     typeof rawRule.replacementText === 'string' ? rawRule.replacementText.trim() : '';
   const domain = normalizeDomain(rawRule.domain || '');
+  const rawUrlPath = typeof rawRule.urlPath === 'string' ? rawRule.urlPath.trim() : '';
+  const urlExact =
+    normalizeExactUrlKey(rawRule.urlExact || rawRule.exactUrl || rawRule.url || '') ||
+    (rawUrlPath && domain ? normalizeExactUrlKey(`${domain}${normalizeUrlPath(rawUrlPath)}`) : '');
   const enabled = rawRule.enabled !== false;
 
   return {
@@ -79,6 +137,7 @@ function sanitizeRule(rawRule) {
     targetText,
     replacementText,
     domain,
+    urlExact,
     enabled
   };
 }
@@ -88,7 +147,8 @@ function dedupeRules(rules) {
   const unique = [];
 
   for (const rule of rules) {
-    const key = `${rule.targetText}||${rule.replacementText || ''}||${rule.domain || ''}`;
+    const urlKey = getRuleExactUrlKey(rule);
+    const key = `${rule.targetText}||${rule.replacementText || ''}||${rule.domain || ''}||${urlKey}`;
     if (seen.has(key)) {
       continue;
     }
@@ -119,12 +179,16 @@ function mergeRules(existingRules, incomingRules) {
   const merged = [...existingRules];
   const exists = new Set(
     existingRules.map(
-      (rule) => `${rule.targetText}||${rule.replacementText || ''}||${rule.domain || ''}`
+      (rule) => {
+        const urlKey = getRuleExactUrlKey(rule);
+        return `${rule.targetText}||${rule.replacementText || ''}||${rule.domain || ''}||${urlKey}`;
+      }
     )
   );
 
   for (const rule of incomingRules) {
-    const key = `${rule.targetText}||${rule.replacementText || ''}||${rule.domain || ''}`;
+    const urlKey = getRuleExactUrlKey(rule);
+    const key = `${rule.targetText}||${rule.replacementText || ''}||${rule.domain || ''}||${urlKey}`;
     if (exists.has(key)) {
       continue;
     }
@@ -228,7 +292,9 @@ function renderRules(rules) {
     const text = document.createElement('div');
     text.className = 'rule-text';
     const domainLabel = rule.domain ? ` [${rule.domain}]` : ' [all domains]';
-    text.textContent = `${rule.targetText} → ${rule.replacementText || ''}${domainLabel}`;
+    const urlKey = getRuleExactUrlKey(rule);
+    const urlLabel = urlKey ? ` [url ${urlKey}]` : '';
+    text.textContent = `${rule.targetText} → ${rule.replacementText || ''}${domainLabel}${urlLabel}`;
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'link-btn';

@@ -17,6 +17,40 @@ function normalizeDomain(value) {
   }
 }
 
+function normalizeUrlPath(value) {
+  const trimmed = (value || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.startsWith('/')) {
+    return trimmed;
+  }
+
+  return `/${trimmed}`;
+}
+
+function normalizeExactUrlKey(value) {
+  const trimmed = (value || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  const withScheme = trimmed.includes('://') ? trimmed : `https://${trimmed}`;
+
+  try {
+    const parsed = new URL(withScheme);
+    if (!parsed.host) {
+      return '';
+    }
+    const host = parsed.host.toLowerCase();
+    const path = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/';
+    return `${host}${path}`;
+  } catch (error) {
+    return '';
+  }
+}
+
 function getHostname(tabUrl) {
   if (!tabUrl || typeof tabUrl !== 'string') {
     return '';
@@ -24,6 +58,21 @@ function getHostname(tabUrl) {
 
   try {
     return new URL(tabUrl).hostname.toLowerCase();
+  } catch (error) {
+    return '';
+  }
+}
+
+function getUrlKey(tabUrl) {
+  if (!tabUrl || typeof tabUrl !== 'string') {
+    return '';
+  }
+
+  try {
+    const parsed = new URL(tabUrl);
+    const host = parsed.host.toLowerCase();
+    const path = `${parsed.pathname}${parsed.search}${parsed.hash}` || '/';
+    return `${host}${path}`;
   } catch (error) {
     return '';
   }
@@ -41,6 +90,44 @@ function ruleMatchesDomain(rule, hostname) {
   }
 
   return hostname === ruleDomain || hostname.endsWith(`.${ruleDomain}`);
+}
+
+function getRuleExactUrlKey(rule) {
+  if (!rule || typeof rule !== 'object') {
+    return '';
+  }
+
+  const direct = normalizeExactUrlKey(rule.urlExact || rule.exactUrl || rule.url || '');
+  if (direct) {
+    return direct;
+  }
+
+  const domain = normalizeDomain(rule.domain || '');
+  const rawUrlPath = typeof rule.urlPath === 'string' ? rule.urlPath.trim() : '';
+  const urlPath = normalizeUrlPath(rawUrlPath);
+  if (domain && rawUrlPath && urlPath) {
+    return normalizeExactUrlKey(`${domain}${urlPath}`);
+  }
+
+  return '';
+}
+
+function ruleMatchesExactUrl(rule, tabUrl) {
+  const ruleUrlKey = getRuleExactUrlKey(rule);
+  if (!ruleUrlKey) {
+    return true;
+  }
+
+  const tabUrlKey = getUrlKey(tabUrl);
+  if (!tabUrlKey) {
+    return false;
+  }
+
+  return tabUrlKey === ruleUrlKey;
+}
+
+function ruleMatchesTab(rule, tabUrl) {
+  return ruleMatchesDomain(rule, getHostname(tabUrl)) && ruleMatchesExactUrl(rule, tabUrl);
 }
 
 async function getRules() {
@@ -123,7 +210,7 @@ async function applyRuleToAllTabs() {
       .filter((tab) => typeof tab.id === 'number' && typeof tab.title === 'string')
       .map((tab) => ({
         tab,
-        matchedRules: rules.filter((rule) => ruleMatchesDomain(rule, getHostname(tab.url)))
+        matchedRules: rules.filter((rule) => ruleMatchesTab(rule, tab.url))
       }))
       .filter(({ tab, matchedRules }) => matchedRules.length && applyRulesToText(tab.title, matchedRules) !== tab.title)
       .map(({ tab, matchedRules }) => rewriteTabTitle(tab.id, matchedRules))
@@ -142,7 +229,7 @@ async function applyRuleToTab(tabId) {
     return;
   }
 
-  const matchedRules = rules.filter((rule) => ruleMatchesDomain(rule, getHostname(tab.url)));
+  const matchedRules = rules.filter((rule) => ruleMatchesTab(rule, tab.url));
   if (!matchedRules.length) {
     return;
   }

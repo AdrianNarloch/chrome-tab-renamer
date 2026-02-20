@@ -36,6 +36,14 @@
       "replacementText": "Brand System",
       "domain": "figma.com",
       "enabled": true
+    },
+    {
+      "id": "demo-6",
+      "targetText": "Quarterly Results - Admin Console",
+      "replacementText": "Admin Console",
+      "domain": "",
+      "urlExact": "admin.example.com/admin/reports?view=quarterly",
+      "enabled": true
     }
   ]
 }

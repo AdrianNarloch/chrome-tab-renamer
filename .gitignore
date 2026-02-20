@@ -1,0 +1,20 @@
+# Node dependencies
+node_modules/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE-specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build and logs
+dist/
+build/
+*.log
+*.tmp
+*.bak
